@@ -1,5 +1,7 @@
 package io.ripc.internal;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -45,4 +47,48 @@ public class Publishers {
             }
         };
     }
+
+    public static <T> Publisher<T> fromCompletableFuture(CompletableFuture<T> future) {
+        return new Publisher<T>() {
+            @Override
+            public void subscribe(Subscriber<? super T> s) {
+                future.whenComplete((value, t) -> {
+                    if (t != null) {
+                        s.onError(t);
+                    }
+                    else {
+                        s.onNext(value);
+                        s.onComplete();
+                    }
+                });
+            }
+        };
+	}
+
+    public static <T> CompletableFuture<Void> toCompletableFuture(Publisher<T> p) {
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        p.subscribe(new Subscriber<T>() {
+            @Override
+            public void onSubscribe(Subscription s) {
+                s.request(Long.MAX_VALUE);
+            }
+
+            @Override
+            public void onNext(T t) {
+
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                future.completeExceptionally(t);
+            }
+
+            @Override
+            public void onComplete() {
+                future.complete(null);
+            }
+        });
+        return future;
+    }
+
 }

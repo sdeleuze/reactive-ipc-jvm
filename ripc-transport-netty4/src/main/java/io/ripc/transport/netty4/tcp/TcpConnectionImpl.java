@@ -1,5 +1,7 @@
 package io.ripc.transport.netty4.tcp;
 
+import java.util.concurrent.CompletableFuture;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -17,13 +19,19 @@ public class TcpConnectionImpl<R, W> implements TcpConnection<R, W> {
     }
 
     @Override
-    public Publisher<Void> write(final Publisher<? extends W> data) {
-        return new Publisher<Void>() {
+    public CompletableFuture<Void> write(final Publisher<? extends W> data) {
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        nettyChannel.write(data).addListener(new ChannelFutureListener() {
             @Override
-            public void subscribe(Subscriber<? super Void> s) {
-                nettyChannel.write(data).addListener(new FutureToSubscriberBridge(s));
+            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+                if (!channelFuture.isSuccess()) {
+                    future.completeExceptionally(channelFuture.cause());
+                } else {
+                    future.complete(null);
+                }
             }
-        };
+        });
+        return future;
     }
 
     @Override

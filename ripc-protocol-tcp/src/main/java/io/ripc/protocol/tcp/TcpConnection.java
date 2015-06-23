@@ -1,5 +1,7 @@
 package io.ripc.protocol.tcp;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.reactivestreams.Publisher;
 
 /**
@@ -18,6 +20,6 @@ public interface TcpConnection<R, W> extends Publisher<R> {
      *
      * @return Result of write.
      */
-    Publisher<Void> write(Publisher<? extends W> data);
+    CompletableFuture<Void> write(Publisher<? extends W> data);
 
 }

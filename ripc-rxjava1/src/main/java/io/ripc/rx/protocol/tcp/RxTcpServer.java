@@ -1,10 +1,10 @@
 package io.ripc.rx.protocol.tcp;
 
+import java.util.concurrent.CompletableFuture;
+
 import io.ripc.protocol.tcp.TcpConnection;
 import io.ripc.protocol.tcp.TcpHandler;
 import io.ripc.protocol.tcp.TcpServer;
-import org.reactivestreams.Publisher;
-import rx.RxReactiveStreams;
 
 public final class RxTcpServer<R, W> {
 
@@ -18,8 +18,8 @@ public final class RxTcpServer<R, W> {
 
         transport.start(new TcpHandler<R, W>() {
             @Override
-            public Publisher<Void> handle(TcpConnection<R, W> connection) {
-                return RxReactiveStreams.toPublisher(handler.handle(RxConnection.create(connection)));
+            public CompletableFuture<Void> handle(TcpConnection<R, W> connection) {
+                return handler.handle(RxConnection.create(connection));
             }
         });
 

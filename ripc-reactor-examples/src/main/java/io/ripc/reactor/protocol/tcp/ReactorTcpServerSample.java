@@ -2,6 +2,7 @@ package io.ripc.reactor.protocol.tcp;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.ripc.internal.Publishers;
 import io.ripc.protocol.tcp.TcpServer;
 import io.ripc.transport.netty4.tcp.Netty4TcpServer;
 import reactor.rx.Streams;
@@ -17,11 +18,11 @@ public class ReactorTcpServerSample {
         TcpServer<ByteBuf, ByteBuf> transport = Netty4TcpServer.<ByteBuf, ByteBuf>create(0);
 
         ReactorTcpServer.create(transport)
-                        .start(connection -> connection.flatMap(bb -> {
+                        .start(connection -> Publishers.toCompletableFuture(connection.flatMap(bb -> {
                             String msgStr = "Hello " + bb.toString(Charset.defaultCharset()) + "!";
                             ByteBuf msg = Unpooled.buffer().writeBytes(msgStr.getBytes());
-                            return connection.writeWith(Streams.just(msg));
-                        }));
+                            return Publishers.fromCompletableFuture(connection.writeWith(Streams.just(msg)));
+                        })));
     }
 
 }

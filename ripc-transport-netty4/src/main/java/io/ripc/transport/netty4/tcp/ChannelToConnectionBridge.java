@@ -45,29 +45,14 @@ public class ChannelToConnectionBridge<R, W> extends ChannelDuplexHandler {
     public void channelActive(final ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         conn = new TcpConnectionImpl<>(ctx.channel());
-        handler.handle(conn)
-               .subscribe(new Subscriber<Void>() {
-                   @Override
-                   public void onSubscribe(Subscription s) {
-                       // Void, no op
-                   }
-
-                   @Override
-                   public void onNext(Void aVoid) {
-                       // Void, no op
-                   }
-
-                   @Override
-                   public void onError(Throwable t) {
-                       logger.error("Error processing connection. Closing the channel.", t);
-                       ctx.channel().close();
-                   }
-
-                   @Override
-                   public void onComplete() {
-                       ctx.channel().close();
-                   }
-               });
+        handler.handle(conn).whenComplete((ok, ex) -> {
+            if (ok != null) {
+                ctx.channel().close();
+            } else {
+                logger.error("Error processing connection. Closing the channel.", ex);
+                ctx.channel().close();
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")

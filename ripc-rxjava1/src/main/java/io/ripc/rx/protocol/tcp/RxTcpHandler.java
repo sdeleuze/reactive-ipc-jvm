@@ -1,8 +1,8 @@
 package io.ripc.rx.protocol.tcp;
 
-import rx.Observable;
+import java.util.concurrent.CompletableFuture;
 
 public interface RxTcpHandler<R, W> {
 
-    Observable<Void> handle(RxConnection<R, W> connection);
+    CompletableFuture<Void> handle(RxConnection<R, W> connection);
 }

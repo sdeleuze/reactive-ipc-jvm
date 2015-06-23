@@ -1,5 +1,7 @@
 package io.ripc.reactor.protocol.tcp;
 
+import java.util.concurrent.CompletableFuture;
+
 import io.ripc.protocol.tcp.TcpConnection;
 import io.ripc.protocol.tcp.TcpHandler;
 import io.ripc.protocol.tcp.TcpServer;
@@ -26,7 +28,7 @@ public class ReactorTcpServer<R, W> {
 
         transport.startAndAwait(new TcpHandler<R, W>() {
             @Override
-            public Publisher<Void> handle(TcpConnection<R, W> connection) {
+            public CompletableFuture<Void> handle(TcpConnection<R, W> connection) {
                 return handler.apply(new ReactorTcpConnection<>(connection));
             }
         });

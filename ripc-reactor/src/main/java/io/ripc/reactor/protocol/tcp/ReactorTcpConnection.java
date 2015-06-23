@@ -1,5 +1,7 @@
 package io.ripc.reactor.protocol.tcp;
 
+import java.util.concurrent.CompletableFuture;
+
 import io.ripc.protocol.tcp.TcpConnection;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -16,7 +18,7 @@ public class ReactorTcpConnection<R, W> extends Stream<R> {
         this.transport = transport;
     }
 
-    public Publisher<Void> writeWith(Publisher<W> out) {
+    public CompletableFuture<Void> writeWith(Publisher<W> out) {
         return transport.write(out);
     }
 

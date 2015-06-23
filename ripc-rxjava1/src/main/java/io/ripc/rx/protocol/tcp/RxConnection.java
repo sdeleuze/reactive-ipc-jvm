@@ -1,5 +1,7 @@
 package io.ripc.rx.protocol.tcp;
 
+import java.util.concurrent.CompletableFuture;
+
 import io.ripc.protocol.tcp.TcpConnection;
 import rx.Observable;
 import rx.Subscriber;
@@ -8,7 +10,7 @@ import rx.internal.reactivestreams.SubscriberAdapter;
 import static rx.RxReactiveStreams.*;
 
 /**
- * An adapter for {@link io.ripc.protocol.tcp.TcpConnection} representated as an {@link Observable}
+ * An adapter for {@link io.ripc.protocol.tcp.TcpConnection} represented as an {@link Observable}
  *
  * @param <R> The type of objects read from this connection.
  * @param <W> The type of objects written to this connection.
@@ -28,15 +30,15 @@ public class RxConnection<R, W> extends Observable<R> {
     }
 
     /**
-     * Writes the passed stream of {@code data} and returns the result as an {@link Observable}. All items emitted by
+     * Writes the passed stream of {@code data} and returns the result as an {@link CompletableFuture}. All items emitted by
      * this stream are flushed on completion of the stream.
      *
      * @param data Data stream to write.
      *
      * @return Result of write.
      */
-    public Observable<Void> write(Observable<W> data) {
-        return toObservable(delegate.write(toPublisher(data)));
+    public CompletableFuture<Void> write(Observable<W> data) {
+        return delegate.write(toPublisher(data));
     }
 
     public static <R, W> RxConnection<R, W> create(TcpConnection<R, W> delegate) {

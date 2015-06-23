@@ -1,8 +1,8 @@
 package io.ripc.protocol.tcp;
 
-import org.reactivestreams.Publisher;
+import java.util.concurrent.CompletableFuture;
 
 public interface TcpHandler<R, W> {
 
-    Publisher<Void> handle(TcpConnection<R, W> connection);
+    CompletableFuture<Void> handle(TcpConnection<R, W> connection);
 }
