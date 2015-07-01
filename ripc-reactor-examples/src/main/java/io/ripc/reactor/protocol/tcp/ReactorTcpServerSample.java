@@ -26,7 +26,7 @@ public class ReactorTcpServerSample {
      */
     private static void echo(TcpServer<ByteBuf, ByteBuf> transport) {
         ReactorTcpServer.create(transport)
-                        .start(connection -> {
+                        .startAndAwait(connection -> {
                             connection.flatMap(inByteBuf -> {
                                 String text = "Hello " + inByteBuf.toString(Charset.defaultCharset());
                                 ByteBuf outByteBuf = Unpooled.buffer().writeBytes(text.getBytes());
@@ -41,7 +41,7 @@ public class ReactorTcpServerSample {
      */
     private static void echoWithQuitCommand(TcpServer<ByteBuf, ByteBuf> transport) {
         ReactorTcpServer.create(transport)
-                .start(connection -> {
+                .startAndAwait(connection -> {
                     Promise<Void> promise = Promises.prepare();
                     connection.flatMap(inByteBuf -> {
                         String input = inByteBuf.toString(Charset.defaultCharset()).trim();

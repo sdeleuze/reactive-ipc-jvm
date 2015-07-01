@@ -51,14 +51,11 @@ public class CodecSample {
                     }
                 });
 
-        ReactorTcpServer.create(transport).start(connection -> {
-            connection.log("input")
-                    .observeComplete(v -> LOG.info("Connection input complete"))
-                    .capacity(1)
-                    .consume(line -> {
-                        String response = "Hello " + line + "\n";
-                        Streams.wrap(connection.writeWith(Streams.just(response))).consume();
-                    });
+        ReactorTcpServer.create(transport).startAndAwait(connection -> {
+            connection.log("input").observeComplete(v -> LOG.info("Connection input complete")).capacity(1).consume(line -> {
+                String response = "Hello " + line + "\n";
+                Streams.wrap(connection.writeWith(Streams.just(response))).consume();
+            });
             return Streams.never();
         });
     }
@@ -77,7 +74,7 @@ public class CodecSample {
                 });
 
         ReactorTcpServer.create(transport)
-                .start(connection -> {
+                .startAndAwait(connection -> {
                     connection.log("input")
                             .observeComplete(v -> LOG.info("Connection input complete"))
                             .capacity(1)
