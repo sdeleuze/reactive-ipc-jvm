@@ -1,5 +1,7 @@
 package io.ripc.internal;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -14,16 +16,30 @@ public class Publishers {
             @Override
             public void subscribe(final Subscriber<? super T> s) {
                 s.onSubscribe(new Subscription() {
+
+                    private AtomicInteger index = new AtomicInteger(0);
+
                     @Override
                     public void request(long n) {
-                        for (T value : values) {
-                            s.onNext(value);
+                        if (n < 1) {
+                            s.onError(new IllegalArgumentException("The number of requested elements should be strictly positive."));
                         }
-                        s.onComplete();
+                        if (index.get() == values.length) {
+                            return;
+                        }
+                        long remaining = n;
+                        while (index.get() < values.length && remaining > 0) {
+                            s.onNext(values[index.getAndIncrement()]);
+                            remaining--;
+                        }
+                        if (index.get() == values.length) {
+                            s.onComplete();
+                        }
                     }
 
                     @Override
                     public void cancel() {
+                        index.set(values.length);
                     }
                 });
             }
